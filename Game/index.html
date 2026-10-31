@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#11131c">
+  <title>Gece Uçuşu — Tek Level</title>
+  <style>
+    :root{color-scheme:dark;--ink:#f7f0df;--muted:#c4beaf;--gold:#f4c76c;--violet:#b895ff;--panel:rgba(18,19,29,.92)}
+    *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#10121a;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;touch-action:manipulation}
+    body{display:grid;place-items:center;background:radial-gradient(ellipse at 50% 40%,#30273e 0%,#161822 53%,#0d1017 100%)}
+    .game-shell{position:relative;width:min(100vw,calc(100vh * 1.7778));height:min(100vh,calc(100vw * .5625));aspect-ratio:16/9;overflow:hidden;background:#171927;box-shadow:0 24px 90px #0009,inset 0 0 0 1px #ffffff18;isolation:isolate}
+    canvas{display:block;width:100%;height:100%;image-rendering:pixelated}
+    .topbar{position:absolute;inset:0 0 auto;display:flex;align-items:flex-start;justify-content:space-between;padding:clamp(12px,2.2vw,24px);pointer-events:none;z-index:2}
+    .pause,.score-card{pointer-events:auto;border:1px solid #ffffff30;background:#11131ac9;backdrop-filter:blur(12px);box-shadow:0 6px 24px #0004}
+    .pause{width:46px;height:46px;border-radius:15px;color:white;font-size:19px;display:grid;place-items:center;cursor:pointer;transition:.2s}
+    .pause:hover{background:#272735;transform:translateY(-1px)}
+    .score-card{min-width:108px;padding:8px 15px;border-radius:15px;text-align:center}.score-label{display:block;color:#c6beae;font-size:9px;font-weight:800;letter-spacing:.2em}.score-value{font-size:25px;line-height:1.1;font-weight:900;color:#fff3d1;text-shadow:0 2px 14px #f1b75d77}
+    .hint{position:absolute;left:50%;bottom:clamp(14px,3vw,30px);transform:translateX(-50%);z-index:1;color:#fff;font-size:clamp(10px,1.3vw,13px);letter-spacing:.08em;text-transform:uppercase;padding:9px 14px;border-radius:99px;background:#11131a8c;border:1px solid #ffffff24;white-space:nowrap;transition:opacity .3s;pointer-events:none}
+    .overlay{position:absolute;inset:0;display:grid;place-items:center;padding:18px;background:linear-gradient(120deg,#10121ad1,#11131a8c 55%,#11131aaa);backdrop-filter:blur(5px);z-index:4;opacity:1;transition:opacity .22s}
+    .overlay.hidden{opacity:0;pointer-events:none}
+    .panel{width:min(410px,94%);max-height:94%;overflow:auto;padding:clamp(22px,4vw,38px);border-radius:25px;border:1px solid #fff2;background:linear-gradient(145deg,#272331f5,#151720f5 73%);box-shadow:0 25px 80px #0008,0 1px 0 #fff1 inset;text-align:center;animation:rise .28s ease-out}
+    @keyframes rise{from{opacity:.4;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+    .eyebrow{margin:0 0 8px;color:var(--gold);font-size:10px;font-weight:900;letter-spacing:.28em;text-transform:uppercase}
+    h1{margin:0;color:#fff5df;font-family:Georgia,serif;font-size:clamp(34px,6vw,54px);line-height:.98;letter-spacing:-.04em;text-shadow:0 3px 25px #be8aeb55}
+    .subtitle{margin:12px 0 22px;color:#c9c3d0;font-size:13px;line-height:1.6}
+    .menu-actions{display:grid;gap:9px;margin-top:18px}.action{width:100%;padding:13px 16px;border:1px solid #ffffff17;border-radius:13px;background:#ffffff0b;color:#f3eddf;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:.16s}.action:hover{background:#ffffff16;transform:translateY(-1px)}.action.primary{border:0;background:linear-gradient(100deg,#f5cd78,#e8a85a);color:#302218;box-shadow:0 8px 24px #e8ad5c38;font-size:15px}.action.primary:hover{filter:brightness(1.06)}
+    .panel-foot{margin:17px 0 0;color:#9e99a5;font-size:10px;letter-spacing:.04em}
+    .subhead{font:700 28px Georgia,serif;margin:0 0 7px}.copy{font-size:13px;color:#d4ced9;line-height:1.7;margin:10px 0 18px}.back{margin-top:14px;color:#d8c7f7}
+    .hero-art{display:block;width:132px;height:108px;object-fit:contain;margin:-7px auto 7px;image-rendering:pixelated;filter:drop-shadow(0 10px 18px #bd87e966)}
+    .costume-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:16px 0 4px}.costume{position:relative;min-height:112px;padding:7px 7px 9px;overflow:hidden;border-radius:14px;border:1px solid #ffffff20;background:#ffffff08;color:#eee6dc;cursor:pointer;transition:.18s}.costume:hover{background:#ffffff12;transform:translateY(-2px)}.costume.selected{border-color:#f4c76c;box-shadow:0 0 0 1px #f4c76c55,0 0 18px #f4c76c22}.costume img{display:block;width:100%;height:74px;object-fit:contain;image-rendering:pixelated}.costume span{font-size:11px;font-weight:750}.selected-mark{position:absolute;top:7px;right:8px;font-size:11px;color:#ffe39d}
+    @media(max-width:600px){.game-shell{width:100vw;height:100dvh;aspect-ratio:auto}.panel{width:min(390px,94%);padding:23px}.pause{width:42px;height:42px}.score-card{min-width:83px;padding:6px 11px}.score-value{font-size:22px}.hint{bottom:16px}.overlay{padding:12px}}
+    @media(max-height:500px) and (orientation:landscape){.panel{padding:16px 22px}.subtitle{margin:7px 0 12px}.menu-actions{gap:6px;margin-top:11px}.action{padding:10px}.panel-foot{margin-top:10px}.costume{min-height:90px}.costume img{height:52px}}
+  </style>
+</head>
+<body>
+  <main class="game-shell" aria-label="Gece Uçuşu oyunu">
+    <canvas id="game" aria-label="Flappy Bird oyunu alanı"></canvas>
+    <div class="topbar"><button class="pause" id="pauseBtn" aria-label="Oyunu duraklat" title="Duraklat / menü">Ⅱ</button><div class="score-card"><span class="score-label">SKOR</span><span class="score-value" id="score">0</span></div></div>
+    <div class="hint" id="hint">Dokun ya da boşluk tuşuna bas · uç!</div>
+    <section class="overlay" id="overlay" aria-live="polite"><div class="panel" id="panel"></div></section>
+  </main>
+  <script>
+  (()=>{
+    const W=960,H=540, canvas=document.querySelector('#game'),ctx=canvas.getContext('2d'),overlay=document.querySelector('#overlay'),panel=document.querySelector('#panel'),scoreEl=document.querySelector('#score'),hint=document.querySelector('#hint');
+    const files=['2.png','3.png','4.png','5.png','1.png'];
+    const names=['Saatçi','Bakır Kabak','Gece Büyücüsü','Minik Kanat','Kabus'];
+    const characters=files.map(file=>{const im=new Image();im.src='IMG/'+file;return im});
+    const backdrop=new Image();backdrop.src='IMG/1.png';
+    let selected=0,screen='home',previous='home',running=false,dead=false,score=0,best=Number(localStorage.getItem('gece-best')||0),last=0,elapsed=0,spawn=0,shake=0;
+    const bird={x:250,y:255,vy:0,r:20,rot:0};let pipes=[];
+    let seed=9365;const rand=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};const stars=Array.from({length:75},()=>({x:rand()*W,y:rand()*H*.72,s:rand()*2+.4,p:rand()*7}));
+    function fit(){const dpr=Math.min(window.devicePixelRatio||1,2),rect=canvas.getBoundingClientRect();canvas.width=Math.round(rect.width*dpr);canvas.height=Math.round(rect.height*dpr);ctx.setTransform(canvas.width/W,0,0,canvas.height/H,0,0)}window.addEventListener('resize',fit);fit();
+    function show(which){screen=which;overlay.classList.remove('hidden');renderPanel()}
+    function hide(){overlay.classList.add('hidden')}
+    function reset(){score=0;scoreEl.textContent='0';bird.y=H*.46;bird.vy=0;bird.rot=0;pipes=[];spawn=.42;elapsed=0;dead=false;running=true;hide();hint.style.opacity=1}
+    function resume(){running=true;dead=false;hide();last=performance.now()}
+    function pause(){if(running){running=false;previous='pause';show('pause')}}
+    function renderPanel(){
+      if(screen==='costumes'){
+        panel.innerHTML='<p class="eyebrow">KARAKTER ARŞİVİ</p><h2 class="subhead">Kostümünü seç</h2><p class="copy">Geceye hangi kahramanla karışacaksın?</p><div class="costume-list">'+names.map((n,i)=>`<button class="costume ${i===selected?'selected':''}" data-i="${i}">${i===selected?'<b class="selected-mark">✓</b>':''}<img src="IMG/${files[i]}" alt="${n}"><span>${n}</span></button>`).join('')+'</div><button class="action back" data-action="back">← Menüye dön</button>';
+        panel.querySelectorAll('.costume').forEach(b=>b.onclick=()=>{selected=Number(b.dataset.i);renderPanel()});panel.querySelector('[data-action=back]').onclick=()=>show(previous==='pause'?'pause':'home');return
+      }
+      if(screen==='about'){panel.innerHTML='<p class="eyebrow">OYUN REHBERİ</p><h2 class="subhead">Nasıl oynanır?</h2><p class="copy">Karakterini uçurmak için ekrana dokun ya da <b>boşluk</b> tuşuna bas. Her taş sütunun arasından güvenle geçtiğinde skorun artar. Sütunlara veya zemine çarpmadan olabildiğince ilerle!</p><p class="copy"><b>Geliştirici</b><br>Aziret Melisov</p><button class="action back" data-action="back">← Menüye dön</button>';panel.querySelector('[data-action=back]').onclick=()=>show(previous==='pause'?'pause':'home');return}
+      const isPause=screen==='pause',isOver=screen==='over';
+      const title=isOver?'Uçuş sona erdi':isPause?'Bir nefes al':'Gece Uçuşu';const eyebrow=isOver?'BU SEFERLİK BU KADAR':isPause?'OYUN DURAKLATILDI':'TEK LEVEL · SINIRSIZ UÇUŞ';
+      panel.innerHTML=`<p class="eyebrow">${eyebrow}</p><img class="hero-art" src="IMG/${files[selected]}" alt="${names[selected]} kostümü"><h1>${title}</h1><p class="subtitle">${isOver?`Skorun <b>${score}</b> · En iyi <b>${best}</b>`:isPause?'Hazır olduğunda macerana kaldığın yerden devam et.':'Sisli ormanın içinden geç, sütunlara çarpmadan en yüksek skora ulaş.'}</p><div class="menu-actions">${isPause?'<button class="action primary" data-action="resume">▶ &nbsp; Devam et</button>':''}${!isPause?`<button class="action primary" data-action="start">${isOver?'↻ &nbsp; Yeniden başla':'▶ &nbsp; Oyunu başlat'}</button>`:''}${isPause?'<button class="action" data-action="start">↻ &nbsp; Baştan başla</button>':''}<button class="action" data-action="costumes">✦ &nbsp; Kostümler</button><button class="action" data-action="about">ⓘ &nbsp; Hakkında</button></div><p class="panel-foot">${isPause?'ESC ile menüye dön · Boşluk ile uç':'Masaüstünde boşluk · Telefonda dokun'}</p>`;
+      panel.querySelectorAll('[data-action]').forEach(b=>b.onclick=()=>{const a=b.dataset.action;if(a==='start')reset();if(a==='resume')resume();if(a==='costumes'||a==='about'){previous=screen;show(a)}})
+    }
+    function flap(){if(!running){if(screen==='home'||screen==='over')reset();else if(screen==='pause')resume();else return}bird.vy=-390;bird.rot=-.42;hint.style.opacity=0}
+    canvas.addEventListener('pointerdown',e=>{if(running){e.preventDefault();flap()}});
+    document.addEventListener('keydown',e=>{if(e.code==='Escape'){e.preventDefault();if(running)pause();else if(screen==='costumes'||screen==='about')show(previous==='pause'?'pause':'home');else if(screen==='pause')show('home');return}if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();if(running)flap();else if(screen==='home'||screen==='over')reset();else if(screen==='pause')resume()}});
+    document.querySelector('#pauseBtn').addEventListener('click',()=>{if(running)pause();else if(screen!=='home')show('home')});
+    function rounded(x,y,w,h,r,color){ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()}
+    function background(t){let g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#191b2d');g.addColorStop(.62,'#34304a');g.addColorStop(1,'#60445b');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+      const moon=ctx.createRadialGradient(725,120,5,725,120,120);moon.addColorStop(0,'#ffe6b65b');moon.addColorStop(1,'#ffe6b600');ctx.fillStyle=moon;ctx.fillRect(600,0,250,260);ctx.fillStyle='#f7dfba';ctx.globalAlpha=.86;ctx.beginPath();ctx.arc(725,117,34,0,Math.PI*2);ctx.fill();ctx.globalAlpha=.12;ctx.fillStyle='#6b5870';ctx.beginPath();ctx.arc(713,105,31,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+      stars.forEach(s=>{ctx.globalAlpha=.3+.5*(.5+.5*Math.sin(t*.001+s.p));ctx.fillStyle='#fff3d2';ctx.fillRect(s.x,s.y,s.s,s.s)});ctx.globalAlpha=1;
+      // Distant forest silhouettes
+      for(let layer=0;layer<3;layer++){ctx.fillStyle=['#28283a','#222332','#191c29'][layer];const base=365+layer*42;for(let x=-25;x<W+50;x+=70){let offset=Math.sin(x*.027+layer*2)*16;ctx.beginPath();ctx.moveTo(x,base+48);ctx.lineTo(x+35,base-70-offset);ctx.lineTo(x+72,base+48);ctx.fill();ctx.fillRect(x+29,base+24,12,60)}}
+      if(backdrop.complete&&backdrop.naturalWidth){ctx.save();ctx.globalAlpha=.42;ctx.drawImage(backdrop,410,80,560,358);ctx.restore()}
+      const haze=ctx.createLinearGradient(0,360,0,500);haze.addColorStop(0,'#caa4b300');haze.addColorStop(1,'#cda3b32c');ctx.fillStyle=haze;ctx.fillRect(0,340,W,150);
+      ctx.fillStyle='#11151f';ctx.fillRect(0,H-35,W,35);ctx.fillStyle='#8d7159';ctx.fillRect(0,H-39,W,5);for(let x=0;x<W;x+=38){ctx.fillStyle=x%76?'#26313a':'#30393c';ctx.fillRect(x,H-34,25,8)}
+    }
+    function drawPipe(p){const x=p.x,w=p.w,g=p.gap,top=p.top;
+      const pillar=(y,h,flip)=>{ctx.fillStyle='#262534';ctx.fillRect(x+7,y,w-14,h);ctx.fillStyle='#393342';ctx.fillRect(x+12,y,7,h);ctx.fillStyle='#655040';ctx.fillRect(x+19,y,w-31,h);ctx.fillStyle='#927252';ctx.fillRect(x+5,y,w-10,6);for(let k=0;k<h;k+=25){ctx.fillStyle='#171b26';ctx.fillRect(x+17,y+k,w-31,3);ctx.fillStyle='#a18360';ctx.fillRect(x+4,y+k+6,5,3)}const capY=flip?y+h-17:y;ctx.fillStyle='#1d1d2a';ctx.fillRect(x,capY,w,17);ctx.fillStyle='#98795c';ctx.fillRect(x,capY,w,5);ctx.fillStyle='#d1aa75';ctx.fillRect(x+5,capY+5,w-10,3);ctx.fillStyle='#474050';ctx.fillRect(x+7,capY+9,w-14,7)};
+      pillar(0,top,false);pillar(top+g,H-top-g-39,true);
+      // moss and little glowing runes
+      ctx.fillStyle='#627b64';for(let z=0;z<4;z++){let yy=(top+z*27)%Math.max(30,top);ctx.fillRect(x+12,yy,7,3);ctx.fillStyle='#d69c5f';ctx.fillRect(x+w-22,yy+9,3,3);ctx.fillStyle='#627b64'}
+    }
+    function drawBird(t){const im=characters[selected],wide=selected===4;ctx.save();ctx.translate(bird.x,bird.y);ctx.rotate(bird.rot);ctx.shadowColor='#f5bd67';ctx.shadowBlur=14;if(im.complete&&im.naturalWidth){const w=wide?104:62,h=wide?68:58;ctx.drawImage(im,-w/2,-h/2,w,h)}else{ctx.fillStyle='#f4ca71';ctx.beginPath();ctx.arc(0,0,18,0,Math.PI*2);ctx.fill()}ctx.restore()}
+    function update(dt){elapsed+=dt;if(running){bird.vy+=1080*dt;bird.y+=bird.vy*dt;bird.rot=Math.min(.85,bird.rot+2.4*dt);spawn-=dt;if(spawn<=0){const gap=170,top=85+rand()*215;pipes.push({x:W+10,w:74,top,gap,passed:false});spawn=1.52}pipes.forEach(p=>{p.x-=230*dt;if(!p.passed&&p.x+p.w<bird.x){p.passed=true;score++;scoreEl.textContent=score;if(score>best){best=score;localStorage.setItem('gece-best',best)}}});pipes=pipes.filter(p=>p.x+p.w>-10);
+        const bx=bird.x,by=bird.y,r=15;let hit=by-r<0||by+r>H-40;for(const p of pipes){if(bx+r>p.x+4&&bx-r<p.x+p.w-4&&(by-r<p.top+5||by+r>p.top+p.gap-5))hit=true}if(hit){running=false;dead=true;shake=9;show('over');hint.style.opacity=0}
+      }if(shake>0)shake=Math.max(0,shake-dt*24)}
+    function draw(t){ctx.save();if(shake>0)ctx.translate((rand()-.5)*shake,(rand()-.5)*shake);background(t);pipes.forEach(drawPipe);if(running||screen==='pause'||screen==='costumes'||screen==='about')drawBird(t);else if(screen==='home'){bird.y=H*.46+Math.sin(t*.002)*7;bird.rot=Math.sin(t*.002)*.05;drawBird(t)}ctx.restore();requestAnimationFrame(draw)}
+    function loop(t){const dt=Math.min((t-last)/1000||0,0.04);last=t;update(dt);requestAnimationFrame(loop)}
+    show('home');requestAnimationFrame(loop);requestAnimationFrame(draw);
+  })();
+  </script>
+</body>
+</html>
