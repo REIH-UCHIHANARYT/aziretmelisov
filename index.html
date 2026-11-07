@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -532,6 +533,32 @@
             transform: translateY(0);
         }
 
+        /* VIDEO MODAL */
+
+        .video-modal-content {
+            background: #100303;
+            border: 1px solid var(--purple);
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .video-modal-content .modal-header {
+            border: none;
+            padding: 12px 15px 0;
+        }
+
+        .video-modal-content .btn-close {
+            filter: invert(1);
+        }
+
+        .video-modal-content video {
+            width: 100%;
+            max-height: 75vh;
+            display: block;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
         @media (max-width: 991px) {
             .hero {
                 text-align: center;
@@ -591,6 +618,33 @@
 </head>
 
 <body>
+
+    <!-- VIDEO MODAL -->
+    <div class="modal fade" id="introVideoModal" tabindex="-1"
+         aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+
+            <div class="modal-content video-modal-content">
+
+                <div class="modal-header">
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Kapat">
+                    </button>
+                </div>
+
+                <div class="modal-body p-2">
+                    <video id="introVideo" controls playsinline preload="auto">
+                        <source src="video.mp4" type="video/mp4">
+                        Tarayıcınız video oynatmayı desteklemiyor.
+                    </video>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg sticky-top">
@@ -900,7 +954,6 @@
                     veya iletişim adresinle güncelleyebilirsin.
                 </p>
 
-                <!-- Buraya kendi GitHub profil bağlantını ekle -->
                 <a href="https://github.com/" target="_blank"
                    rel="noopener noreferrer" class="btn-main">
                     GitHub Profilim ↗
@@ -964,5 +1017,48 @@
             });
         });
     </script>
-<elevenlabs-convai agent-id="agent_4501m68ayj77erkvxe3gc0evfpgf"></elevenlabs-convai><script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script></body>
+
+    <!-- VIDEO MODAL JAVASCRIPT -->
+    <script>
+        const videoModalElement = document.getElementById("introVideoModal");
+        const introVideo = document.getElementById("introVideo");
+
+        const introModal = new bootstrap.Modal(videoModalElement, {
+            backdrop: true,
+            keyboard: true
+        });
+
+        // Sayfa yüklendikten 3 saniye sonra modalı aç
+        window.addEventListener("load", () => {
+            setTimeout(() => {
+                introModal.show();
+            }, 3000);
+        });
+
+        // Modal açıldığında videoyu başlat
+        videoModalElement.addEventListener("shown.bs.modal", () => {
+            introVideo.currentTime = 0;
+
+            introVideo.play().catch((error) => {
+                console.log("Otomatik oynatma engellendi:", error);
+            });
+        });
+
+        // Video bittiğinde modalı kapat
+        introVideo.addEventListener("ended", () => {
+            introModal.hide();
+        });
+
+        // Modal kapandığında videoyu durdur
+        videoModalElement.addEventListener("hidden.bs.modal", () => {
+            introVideo.pause();
+            introVideo.currentTime = 0;
+        });
+    </script>
+
+    <!-- ELEVENLABS AI ASSISTANT -->
+    <elevenlabs-convai agent-id="agent_4501m68ayj77erkvxe3gc0evfpgf"></elevenlabs-convai>
+    <script src="https://unpkg.com/@elevenlabs/convai-widget-embed" async type="text/javascript"></script>
+
+</body>
 </html>
