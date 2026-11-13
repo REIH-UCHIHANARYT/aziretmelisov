@@ -34,6 +34,12 @@
     .game-frame { display:block; width:100%; height:min(75vh,720px); min-height:480px; border:0; background:#10121a; }
     .back-link { display:inline-block; margin-top:26px; color:var(--muted); font-size:14px; font-weight:600; }
     .back-link:hover { color:var(--purple); }
+    .video-modal { position:fixed; inset:0; z-index:20; display:none; place-items:center; padding:20px; background:rgba(10,8,16,.82); backdrop-filter:blur(8px); }
+    .video-modal.open { display:grid; }
+    .video-panel { position:relative; width:min(900px,100%); padding:12px; border:1px solid #ffffff35; border-radius:20px; background:#11131c; box-shadow:0 25px 90px #0009; }
+    .video-close { position:absolute; top:18px; right:18px; z-index:1; width:40px; height:40px; border:1px solid #ffffff50; border-radius:50%; background:#11131cdd; color:#fff; font-size:25px; cursor:pointer; }
+    .intro-video { display:block; width:100%; max-height:78vh; border-radius:12px; background:#000; }
+    .video-note { margin:10px 4px 2px; color:#eee; font-size:13px; text-align:center; }
     footer { padding:24px 20px; border-top:1px solid #ece8f0; text-align:center; color:var(--muted); font-size:13px; }
     @media(max-width:640px) {
       .navbar { padding:14px 0; }
@@ -63,6 +69,18 @@
       </div>
     </nav>
   </header>
+
+  <div class="video-modal" id="introVideoModal" aria-hidden="true">
+    <div class="video-panel" role="dialog" aria-modal="true" aria-label="Site tanıtım videosu">
+      <button class="video-close" id="closeVideo" type="button" aria-label="Videoyu kapat">×</button>
+      <video class="intro-video" id="introVideo" controls autoplay playsinline preload="auto">
+        <source src="video2.mp4" type="video/mp4">
+        Tarayıcın video oynatmayı desteklemiyor.
+      </video>
+      <p class="video-note" id="videoNote" hidden>Otomatik oynatma engellendi. Videoyu başlatmak için oynat düğmesine bas.</p>
+    </div>
+  </div>
+
   <main class="page">
     <p class="eyebrow">Oyunlar</p>
     <h1>Benim <span class="accent">Oyunlarım</span></h1>
@@ -79,6 +97,38 @@
     </section>
     <a class="back-link" href="index.html">← Ana sayfaya dön</a>
   </main>
+
   <footer>© 2026 Aziret Melisov</footer>
+
+  <script>
+    const introVideoModal = document.getElementById("introVideoModal");
+    const introVideo = document.getElementById("introVideo");
+    const videoNote = document.getElementById("videoNote");
+
+    function closeIntroVideo() {
+      introVideoModal.classList.remove("open");
+      introVideoModal.setAttribute("aria-hidden", "true");
+      introVideo.pause();
+      introVideo.currentTime = 0;
+    }
+
+    document.getElementById("closeVideo").addEventListener("click", closeIntroVideo);
+    introVideoModal.addEventListener("click", (event) => {
+      if (event.target === introVideoModal) closeIntroVideo();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && introVideoModal.classList.contains("open")) closeIntroVideo();
+    });
+    introVideo.addEventListener("play", () => { videoNote.hidden = true; });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      window.setTimeout(() => {
+        introVideoModal.classList.add("open");
+        introVideoModal.setAttribute("aria-hidden", "false");
+        const playback = introVideo.play();
+        if (playback) playback.catch(() => { videoNote.hidden = false; });
+      }, 2000);
+    });
+  </script>
 </body>
 </html>
